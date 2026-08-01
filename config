@@ -1,0 +1,23 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[submodule]
+	active = .
+[remote "upstream"]
+	url = https://github.com/rkeele50-sketch/ai-code-exercises.git
+	fetch = +refs/heads/*:refs/remotes/upstream/*
+[branch "main"]
+	remote = upstream
+	merge = refs/heads/main
+	vscode-merge-base = origin/main
+[branch "patch-1"]
+	remote = origin
+	vscode-merge-base = origin/patch-1
+	merge = refs/heads/patch-1
+[remote "origin"]
+	url = https://github.com/rkeele50-sketch/ai-code-exercises.git
+	fetch = +refs/heads/*:refs/remotes/origin/*

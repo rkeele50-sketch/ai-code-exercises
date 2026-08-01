@@ -1,0 +1,8 @@
+Implement task abandonment feature and related methods
+
+- Added `checkAndMarkAbandonedTasks` method in TaskManager to mark overdue tasks as abandoned.
+- Introduced `markAsAbandoned` method in Task class to update task status.
+- Updated TaskStatus enum to include ABANDONED status.
+- Implemented `getOverdueTasksForMoreThan7Days` method in TaskStorage to retrieve overdue tasks.
+- Added `handleAbandonCommand` in TaskManagerCli to trigger abandonment check from CLI.
+- Created a new file for project structure understanding and feature implementation analysis.
