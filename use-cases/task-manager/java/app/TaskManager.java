@@ -172,4 +172,19 @@ public class TaskManager {
 
         return stats;
     }
+    public void applyAbandonmentRule() {
+    List<Task> tasks = storage.getAllTasks();
+    boolean changed = false;
+
+    for (Task task : tasks) {
+        if (task.shouldBeAbandoned()) {
+            task.markAsAbandoned();
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        storage.save();
+    }
+}
 }

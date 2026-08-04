@@ -1,0 +1,199 @@
+//Exercise Part 1
+
+/*
+1. Initial understanding:
+
+- Best guess about how the codebase is organized: 
+  This project is a small task-management application centered on tasks, their priority, and their status. The codebase is organized into clear layers:
+  Structure followed: cli for user interaction, app for business logic, model for task domain entities, storage for JSON persistence
+- Technologies and frameworks used: Java, Gson for JSON serialization, Apache Commons CLI for command-line parsing, Java standard java.time API for date and time handling
+- Main components: TaskManagerCli — command-line interface and command dispatch, TaskManager — business logic and task operations, Task — task domain object, TaskPriority and TaskStatus — enums defining task attributes, TaskStorage — load/save and CRUD logic to/from JSON
+
+2. AI’s analysis:
+The verified structure is:
+
+TaskManagerCli.java
+TaskManager.java
+Task.java
+TaskStorage.java
+Technologies and frameworks used
+Verified from the code:
+Technologies and frameworks used: Java, Gson for JSON serialization, Apache Commons CLI for command-line parsing, Java standard java.time API for date and time handling
+3. Findings:
+- Misconceptions I had:
+The main misconception was assuming the project was organized around a generic “Storage(Task …)” concept. Whereas in reality, the structure was:
+ - app for application logic
+ - cli for interface
+ - model for domain entities
+ - storage for persistence
+Another misconception is that it might be using a database or framework of which it is not. The data is persisted to a local JSON file.
+- Entry points and architectural patterns identified:
+The entry point is: TaskManagerCli.java
+The architectural pattern is a simple layered architecture:
+ - CLI layer receives commands
+ - App layer coordinates operations
+ - Model layer defines data structures
+ - Storage layer persists data
+Key components and their responsibilities:
+ 1. TaskManagerCli.java
+ Parses CLI arguments and routes commands such as create, list, status, priority, delete, and stats.
+ 2. TaskManager.java
+ Implements the task operations, such as creating tasks, filtering tasks, updating status/priority/due date, and computing statistics.
+ 3.Task.java
+ Represents the actual task entity with fields like title, description, priority, status, due date, and tags.
+ 4. TaskPriority.java
+ Defines valid priority levels.
+ 5. TaskStatus.java
+ Defines valid lifecycle statuses.
+ 6. TaskStorage.java
+ Loads and saves task data using Gson and keeps the in-memory task map.
+*/
+
+//Exercise Part 2
+
+/* 1. Hypothesis:
+- Task data export functionality might belong to TaskStorage.java
+This is the strongest candidate for the actual export implementation, because it already contains the JSON load/save logic and uses Gson. Also, ai-code-exercises/use-cases/task-manager/java/model/Task.java - This defines the shape of the data being exported.
+- Existing components that might need to be modified:
+ - cli/ - user command handling
+ - app/ - feature orchestration
+ - storage/ - persistence and export implementation
+ - model/ - task schema used during export
+- Search terms I used and files I found:
+ -export
+ - FileWriter
+ - save
+ - load
+2. Findings:
+- Map out where in the codebase you would implement this new feature:
+
+CLI layer-This layer likely contains:
+-command registration
+-parsing input arguments
+-printing results
+-routing to service methods
+In this codebase, that’s TaskManagerCli.java.
+
+App layer-This layer likely contains:
+- the feature orchestration
+- task selection/filtering
+- validation of export options
+- delegation to storage
+In this codebase, that’s TaskManager.java.
+
+Storage layer-This layer likely contains:
+- file writing logic
+- JSON serialization
+- task collection retrieval
+- saving exported data
+In this codebase, that’s TaskStorage.java.
+
+Model layer-This layer likely contains:
+- the actual fields that need to be exported
+- any business behavior that affects export output
+In this codebase, that’s Task.java.
+
+- Related components that would be affected:
+ - CLI, app/service layer, storage layer, and the task model.
+
+- A plan for how I would approach implementing the export feature:
+ - Start at the CLI entry
+   Open TaskManagerCli.java.
+   Identify how commands are dispatched and where a new export command would fit.
+   Trace into the service layer
+
+ - Open TaskManager.java.
+   Look for methods that correspond to creating, reading, updating, or listing tasks.
+   Inspect the storage layer
+
+ - Open TaskStorage.java.
+   Look for methods that already read/write data and serialize it with Gson.
+   Check the model object
+
+ - Open Task.java.
+   Confirm which fields would be part of the exported representation.
+
+*/
+
+//Exercise Part 3
+
+/*1. Extract domain model:
+- The core entity classes: Task, TaskPriority, TaskStatus, TaskStorage, TaskManager.
+- Terminology or concepts that seem specific to this application: Due date, Overdue, Tag, Status and Priority.
+2. Initial understanding:
+- A simple diagram of how I think the entities relate:
+User-TaskManagerCli-TaskManager-Task-priority: TaskPriority-status: TaskStatus - dueDate-tags-timestamps-TaskStorage-JSON file / persisted tasks
+- A brief explanation of what I think each entity represents:
+ 1. TaskManagerCli.java
+ Parses CLI arguments and routes commands such as create, list, status, priority, delete, and stats.
+ 2. TaskManager.java
+ Implements the task operations, such as creating tasks, filtering tasks, updating status/priority/due date, and computing statistics.
+ 3.Task.java
+ Represents the actual task entity with fields like title, description, priority, status, due date, and tags.
+ 4. TaskPriority.java
+ Defines valid priority levels.
+ 5. TaskStatus.java
+ Defines valid lifecycle statuses.
+ 6. TaskStorage.java
+ Loads and saves task data using Gson and keeps the in-memory task map.
+
+A Task is the work item, Priority tells how urgent it is, Status tells where it is in the process, and TaskStorage is how the system remembers it between runs.
+- Questions or confusion I have about the business logic:
+Why is the overdue calculation a derived rule rather than a stored field?
+What is the difference between a task being IN_PROGRESS and being overdue?
+3. Findings:
+- Misconceptions I had:
+I stated that the system seems to be creating task according to their status or priority. What I found is that the system creates a Task, then manages its priority, status, and dueDate over time.
+-A glossary of domain terms used in the application:
+ - Task: the unit of work
+ - Priority: how urgent or important the work is
+ - Status: where the work is in its workflow
+ - Due date: the expected completion date
+ - Overdue: a task whose due date has passed and which is not done
+ - Tag: a user-defined label for categorization
+ - TaskStorage: the persistence layer that loads and saves tasks
+*/
+
+//Exercise Part 4
+
+/*
+1. Scenario: Your team needs to implement a new business rule: "Tasks that are overdue for more than 7 days should be automatically marked as abandoned unless they are marked as high priority."
+
+2. Planning: Based on my understanding from the previous parts:
+ Add "ABANDONED" to the status enum.
+ Add a rule in the task model or service layer:
+ overdue more than 7 days
+ not high enough priority
+ status not already done
+ When this rule is applied, update the task status to abandoned and persist it.
+ Make sure listing and statistics include the new status cleanly.
+-The files I would need to modify:
+ Task.java
+ TaskStatus.java
+ TaskManager.java
+ TaskManagerCli.java
+- The changes I would make to implement this rule:
+
+Reflection:
+
+How did the AI prompts help you understand where and how to implement this feature?
+By guiding me through the codebase structure, identifying the layers, and clarifying the responsibilities of each component, the AI prompts helped me pinpoint where to implement the new business rule. They also helped me understand how to modify existing classes and methods to accommodate the new status and ensure that the feature integrates seamlessly with the current functionality.
+What aspects of the codebase are you still unsure about?
+Certain edge cases in the overdue calculation and how it interacts with other features like task listing and statistics. I am also unsure about the best way to test the new feature to ensure it behaves correctly under various scenarios.
+What would be your next steps to deepen your understanding?
+- I would build and run the application to see how tasks are created, updated, and listed.
+- I would write unit tests for the new business rule to verify its correctness.
+*/
+
+//Final Discussion and Reflection
+
+/*  
+1. Personal reflection:
+
+Which prompt was most helpful for building your understanding?
+- Prompt 2 because it guided me through the process of identifying where to implement a new feature, which helped me understand the structure and responsibilities of each component in the codebase.
+What would you do differently next time you approach an unfamiliar codebase?
+- I would start by creating a high-level diagram of the architecture and data flow before diving into the code. This would help me visualize how components interact and where to focus my attention.
+What additional tools or resources would complement the AI prompting approach?
+- Visualization tools for code structure, such as UML diagram generators, and static analysis tools to understand dependencies and relationships between classes. Additionally, having access to documentation or comments within the codebase would be beneficial for understanding the intent behind certain implementations.
+*/

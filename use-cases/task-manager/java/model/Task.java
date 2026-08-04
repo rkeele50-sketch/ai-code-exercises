@@ -165,4 +165,28 @@ public class Task {
     public boolean removeTag(String tag) {
         return this.tags.remove(tag);
     }
+    public boolean isOverdueForMoreThanDays(int days) {
+    if (dueDate == null || status == TaskStatus.DONE) {
+        return false;
+    }
+
+    LocalDateTime cutoff = LocalDateTime.now().minusDays(days);
+    return dueDate.isBefore(cutoff);
+}
+
+public boolean shouldBeAbandoned() {
+    if (status == TaskStatus.DONE) {
+        return false;
+    }
+
+    boolean isHighPriority =
+        priority == TaskPriority.HIGH || priority == TaskPriority.URGENT;
+
+    return !isHighPriority && isOverdueForMoreThanDays(7);
+}
+
+public void markAsAbandoned() {
+    this.status = TaskStatus.ABANDONED;
+    this.updatedAt = LocalDateTime.now();
+}
 }
