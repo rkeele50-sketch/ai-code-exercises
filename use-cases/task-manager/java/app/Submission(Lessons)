@@ -1,0 +1,28 @@
+/*
+At first, I thought that the Task Manager codebase was complex, as this was my first time being exposed to that much code. 
+I struggled to identify the flow of the codebase between components, how tasks were being created, validates and updated.
+I also struggled to understand the business logic or rules that were enforced. Moreover, I struggled to understand the strucure
+of the codebase and how all different components relate to each other. It is funny now that I remember how I would mix up the Pompts
+that are given.
+
+After going through the codebase and understanding the different components, I realized that the codebase was not as complex as I initially thought.
+I was able to identify the different components and their responsibilities, as well as the flow of the codebase. I was also able to understand the business logic
+and rules that were enforced, as well as the structure of the codebase and how all different components relate to each other. Also, after working through the Prompt tamplate 
+that we were given, I was able to have a better or rather a more clearer map of the architecture of the codebase and how the different components relate to each other. I was
+also able to identify the different layers of the codebase and how they interact with each other. I understood how tasks moved through the system and where to insert new logic
+without breaking existing functionality. The codebase revealed itself to be more structured and maintainable than I initially assumed.
+
+Prompt 1 helped me identify and understand the enrty points of the codebase and the purpose of key files. Whereas Prompt 2 helped me understand the flow of the codebase and how different
+components interact with each other. It clarified how validation rules are applied and the iportance of keeping the business logic in mind to avoid mistakes like duplicates. Prompt 3
+helped me understand the business logic and rules that were enforced, as well as the structure of the codebase and how all different components relate to each other. It also showed me the
+structure of error handling and feedback were. 
+
+I began by locating the validation layer where similar rules were enforced.I added the new rule in a modular way, ensuring it was reusable and easy to maintain.I updated the controller logic
+to call the new validation function, keeping the flow consistent. Finally, I wrote unit tests to confirm the rule worked as expected and did not interfere with existing functionality.
+I got to identify main components (models, controllers, utilities) before diving into details. Also, I learned to follow a single feature end-to-end to see how data moves
+through the system. Use comments and test cases as guides to understand intended behavior. Moreover, to break the codebase into manageable sections, focusing
+on one module at a time. Use small changes and print/debug statements to confirm assumptions. Lastly I learned to look for repeated structures or conventions that reveal coding standards.
+
+This exercise transformed my perspective: what seemed overwhelming at first became a structured system once I learned where to look and how to break problems down. The strategies I’ve developed
+will help me approach any unfamiliar codebase with confidence and efficiency.
+*/
