@@ -1,0 +1,101 @@
+//Exercise: Algorithm Deconstruction Challenge
+
+/*
+1.Algorithm breakdown using AI prompts from the "Deciphering Complex Functions and Algorithms"
+*From Prompt 1:
+ - The code/algorithm is a weighted scoring routine that computes a task’s overall importance.
+ - If the task has no due date, this whole block is skipped.
+ - negative value → overdue
+   zero → due today
+   positive value → due in future
+ - tasks that are closer to due date get a bigger score increase  
+ - Because the code is ordered, each value gets matched to the first true condition.(The if / else if
+   chain is important: overdue first, then due today, then <= 2 days, then <= 7 days)
+ - Summary: This block says: If a task has a due date, compute how many whole days remain, then
+   add a higher urgency bonus the sooner the task is due, with overdue tasks receiving the biggest bonus.
+*From Prompt 2:
+ - The block is not “manipulating TaskPriorityManager” in a literal sense. It is using the manager class
+   as a helper to compute a numeric priority score for a task, then that score is later used to sort tasks
+   by importance. The intent is:give a task a base importance from its priority, add extra urgency if the
+   due date is near, reduce the score if the task is already done/reviewed and boost it for certain tags or
+   recent activity
+ - The due-date block would be easier to understand if extracted into something like:
+   applyDueDateUrgencyBonus(priorityScore, dueDate) or calculateDueDateUrgencyBonus(dueDate)
+ - The important idea is: higher score = more important / more urgent task
+ - Higher scores indicate tasks that should be handled sooner.
+ - The score combines: base priority (low/medium/high/urgent), urgency based on the due date, status penalties
+   for completed or review items, boosts for blocking tags and a small boost for recently updated tasks
+ - Overdue tasks receive the highest urgency boost, Tasks due today receive a strong boost, while tasks
+   due within the next, week receive a smaller boost. The logic uses coarse day buckets rather and than exact hour-level precision.
+ - Its purpose is to turn due date information into an urgency bonus so that the task can be ranked higher when it is more time-sensitive.
+*From Prompt 3:
+ - This section is not mainly about updating scores depending on tags. It is a score-adjustment pipeline: start with a base score, apply one
+or more score modifiers and return the final score
+    The key idea is:some conditions add points some conditions, subtract points and the result is a single numeric priority score
+- Start
+   |
+   v
+ Calculate initial score
+   |
+   v
+ Check task status
+   |-- if DONE --> subtract 50
+   |-- else if REVIEW --> subtract 15
+   |-- else --> no change
+   |
+   v
+ Check tags
+   |-- if any tag is blocker/critical/urgent --> add 8
+   |-- else --> no change
+   |
+   v
+ Check how recently task was updated
+   |-- compute days since last update
+   |-- if less than 1 day --> add 5
+   |-- else --> no change
+   |
+   v
+ Return final score
+- A good way to think about this function is:“This is a weighted ranking system where each condition contributes a small adjustment to a score.”
+  The final score is just the sum of all these adjustments.
+
+  2. Documentation of my understanding of the AI explanation:
+*From Prompt 1:
+ -This block is not “returning 0, 2, 7.” Instead, it is: Measuring how many whole days remain until the task is due. Assigning an urgency bonus based on that result.
+  Adding that bonus into a running score.
+*From Prompt 2:
+ - 0, 2, and 7 are not return values, they are thresholds used to decide which score bonus to give the method computes a numeric difference first, then classifies it
+ So the logic is: compute daysUntilDue
+                  compare that value
+                  add a score based on which range it falls into
+*From Prompt 3:
+ - This is a weighted ranking system where each condition contributes a small adjustment to a score.
+   The final score is just the sum of all these adjustments.
+3. Insights and learning points:
+I learned that the algorithm is a scoring system that combines multiple factors to determine the overall importance of a task. The factors include the
+task's priority, due date, status, tags, and recent activity. Each factor contributes to the final score, which is used to rank tasks by urgency and importance.
+The algorithm uses a series of conditional checks to apply score adjustments based on these factors, resulting in a single numeric score that reflects the task's
+overall priority. This approach allows for a flexible and dynamic way to manage tasks based on their current state and context.
+
+
+Reflection Questions
+How did the AI’s explanation change your understanding of the algorithm?
+It clarified that the algorithm is a scoring system that combines multiple
+factors to determine the overall importance of a task, rather than just manipulating
+a TaskPriorityManager. It also highlighted the importance of the order of conditions and
+how each factor contributes to the final score.
+What aspects were still difficult to understand after AI explanation?
+The algorithm's handling of due dates and the specific score adjustments for different conditions were still somewhat complex. Understanding how these adjustments
+interact and the rationale behind the specific values used for scoring required further analysis.
+How would you explain this algorithm to another junior developer?
+I would explain that this algorithm calculates a priority score for tasks based on several factors: the task's priority level, how close the due date is, the task's
+status (done or in review), any relevant tags, and how recently the task was updated. Each of these factors can either increase or decrease the score. The final score
+helps determine which tasks should be addressed first, with higher scores indicating more urgent or important tasks.
+Did you test this understanding against AI?
+Yes, I compared my understanding with the AI's explanation and found that it aligned well with the scoring system described. The AI's breakdown helped clarify the purpose
+of each condition and how they contribute to the final score.
+How might you improve the algorithm based on your understanding?
+I might consider refactoring the algorithm to make it more modular and easier to understand. For example, I could extract the due date urgency calculation into a separate
+method, and use constants or configuration for the score adjustments to make it clearer why certain values are used. Additionally, I could add comments and documentation to
+explain the rationale behind each scoring adjustment, making it easier for other developers to understand and maintain the code.
+*/
