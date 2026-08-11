@@ -1,0 +1,365 @@
+//The original code you chose to document
+
+public class TaskPriorityManager {
+
+    /**
+     * Calculate a priority score for a task based on multiple factors.
+     */
+    public static int calculateTaskScore(Task task) {
+        // Base priority weights
+        Map<TaskPriority, Integer> priorityWeights = Map.of(
+            TaskPriority.LOW, 1,
+            TaskPriority.MEDIUM, 2,
+            TaskPriority.HIGH, 3,
+            TaskPriority.URGENT, 4
+        );
+
+        // Calculate base score from priority
+        int score = priorityWeights.getOrDefault(task.getPriority(), 0) * 10;
+
+        // Add due date factor (higher score for tasks due sooner)
+        if (task.getDueDate() != null) {
+            long daysUntilDue = ChronoUnit.DAYS.between(LocalDateTime.now(), task.getDueDate());
+
+            if (daysUntilDue < 0) {  // Overdue tasks
+                score += 30;
+            } else if (daysUntilDue == 0) {  // Due today
+                score += 20;
+            } else if (daysUntilDue <= 2) {  // Due in next 2 days
+                score += 15;
+            } else if (daysUntilDue <= 7) {  // Due in next week
+                score += 10;
+            }
+        }
+
+        // Reduce score for tasks that are completed or in review
+        if (task.getStatus() == TaskStatus.DONE) {
+            score -= 50;
+        } else if (task.getStatus() == TaskStatus.REVIEW) {
+            score -= 15;
+        }u
+
+        // Boost score for tasks with certain tags
+        if (task.getTags().stream().anyMatch(tag ->
+                List.of("blocker", "critical", "urgent").contains(tag))) {
+            score += 8;
+        }
+
+        // Boost score for recently updated tasks
+        long daysSinceUpdate = ChronoUnit.DAYS.between(task.getUpdatedAt(), LocalDateTime.now());
+        if (daysSinceUpdate < 1) {
+            score += 5;
+        }
+
+        return score;
+    }
+
+    /**
+     * Sort tasks by calculated importance score (highest first).
+     */
+    public static List<Task> sortTasksByImportance(List<Task> tasks) {
+        return tasks.stream()
+                .sorted(Comparator.comparing(TaskPriorityManager::calculateTaskScore).reversed())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Return the top N priority tasks.
+     */
+    public static List<Task> getTopPriorityTasks(List<Task> tasks, int limit) {
+        return sortTasksByImportance(tasks).stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+}
+
+//The documentation you generated using Prompt 1
+/*Class: TaskPriorityManager
+Overview
+This utility class provides algorithms for evaluating and ranking tasks based on urgency, due date, completion status, tags, and recent updates.
+It helps task‑management systems automatically sort and prioritize work items by computing a numerical priority score and ordering tasks accordingly.
+
+Method: calculateTaskScore(Task task)
+Description
+Calculates a priority score for a given Task object using weighted factors such as priority level, due date proximity, completion status, critical tags, and recent updates.
+The resulting score represents the relative importance of the task — higher scores indicate higher urgency or relevance.
+
+Parameters
+| Name | Type | Description                                                                                                |
+| ---  | ---  | ---                                                                                                        |
+| `task|`Task`| The task entity containing attributes such as priority, due date, status, tags, and last update timestamp. |
+
+Return Value
+| Type | Description |
+| ---- | ----------- |
+|  int | A computed integer score representing the task’s overall priority. Higher values indicate greater importance. |
+
+Exceptions
+| Exception                | Cause |
+| -------------------------| ------------------------------ |
+| ``NullPointerException`` | If ``task`` or any of its required fields (``priority``, ``status``, ``tags``, ``updatedAt``) are ``null``. |
+|  ``DateTimeException``   | If date calculations fail due to invalid or missing ``dueDate`` or ``updatedAt`` values. |
+
+Example Usage
+Task task = new Task("Submit report", TaskPriority.HIGH, LocalDateTime.now().plusDays(1));
+int score = TaskPriorityManager.calculateTaskScore(task);
+System.out.println("Task score: " + score);
+
+Notes & Edge Cases
+-Overdue tasks receive a +30 boost to emphasize urgency.
+-Due today adds +20; due within 2 days adds +15; due within a week adds +10.
+-Completed (DONE) tasks are penalized −50; in review (REVIEW) −15.
+-Tasks tagged as "blocker", "critical", or "urgent" gain +8.
+-Tasks updated within the last 24 hours gain +5.
+-If no priority is set, the base score defaults to 0.
+-Negative scores are possible for completed tasks — handle accordingly when sorting.
+
+Method: sortTasksByImportance(List<Task> tasks)
+Description
+Sorts a list of tasks by their calculated priority score in descending order (highest first).
+
+Parameters
+|   Name  |      Type     | Description |
+|   ---   |       ---     |     ---     |
+| `tasks` | ``List<Task>``| A list of task objects to be sorted.|
+
+Return Value
+|      Type    | Description |
+|      ---     |     ---     |
+|``List<Task>``| A new list of tasks ordered by descending importance score. |
+
+Example Usage
+List<Task> sortedTasks = TaskPriorityManager.sortTasksByImportance(allTasks);
+sortedTasks.forEach(t -> System.out.println(t.getTitle()));
+
+Notes
+-Uses Java Streams and Comparator.comparing() for concise sorting.
+-Tasks with equal scores retain their relative order (stable sort).
+-Ensure calculateTaskScore() handles null safely before sorting.
+
+Method: getTopPriorityTasks(List<Task> tasks, int limit)
+Description: Retrieves the top N tasks with the highest priority scores.
+
+Parameters
+|   Name  |    Type   | Description |
+|   ---   |    ---    |     ---     |
+|``tasks``| List<Task>| The full list of tasks to evaluate. |
+|``limit``|  ``int``  | The maximum number of top tasks to return. |
+
+Return Value
+|   Type   | Description |
+|    ---   |      ---    |
+|List<Task>| A list containing the highest‑priority tasks, limited by the specified count. |
+
+Example Usage
+List<Task> topTasks = TaskPriorityManager.getTopPriorityTasks(allTasks, 5);
+topTasks.forEach(t -> System.out.println(t.getTitle()));
+
+Notes
+-Internally calls sortTasksByImportance() and applies .limit(limit).
+-If limit exceeds the list size, all tasks are returned.
+-Useful for dashboards or daily focus views.
+
+Developer Notes
+-Scalability: The algorithm runs in O(n log n) time due to sorting.
+-Extensibility: Add new weighting factors (e.g., user‑assigned importance, dependencies) by adjusting calculateTaskScore().
+-Testing: Validate with tasks across all priority levels and date ranges to ensure balanced scoring.
+-Thread Safety: Methods are stateless and safe for concurrent use.
+*/
+//The insights or improvements you identified using Prompt 2
+
+/*
+
+A structured breakdown of the intent and logic behind your TaskPriorityManager code, with commentary and improvement suggestions:
+ 1. High-Level Intent
+    The code is designed to rank tasks by importance in a task management system.
+    It calculates a priority score for each task based on multiple factors (priority level, due date, status, tags, and recent updates), then sorts tasks so that the most urgent and relevant ones appear first.
+    This helps users focus on what matters most.
+
+2. -Step-by-Step Logic
+    calculateTaskScore(Task task)
+    Base priority weights: Each TaskPriority (LOW, MEDIUM, HIGH, URGENT) is mapped to a numeric weight (1–4).
+    The base score is weight × 10.
+    Example: URGENT → 4 × 10 = 40.
+
+   -Due date factor
+    If the task has a due date, calculate days until due.
+    Adjust score depending on urgency:
+    Overdue → +30
+    Due today → +20
+    Due in 2 days → +15
+    Due in a week → +10
+
+   -Status adjustment
+    Completed tasks (DONE) → −50 (push them to the bottom).
+    Tasks in review (REVIEW) → −15 (lower priority than active work).
+
+   -Tag boost
+    If tags include "blocker", "critical", or "urgent", add +8.
+
+   -Recent update boost
+    If updated within the last 24 hours, add +5.
+ 
+   -Return final score
+    The cumulative score reflects urgency, importance, and recency.
+
+-sortTasksByImportance(List<Task> tasks)
+ Uses Java Streams to sort tasks by their calculated score in descending order.
+ Ensures the most urgent tasks appear first.
+
+-getTopPriorityTasks(List<Task> tasks, int limit)
+ Calls sortTasksByImportance() and returns only the top N tasks.
+ Useful for dashboards or daily focus lists.
+
+3. Assumptions & Edge Cases
+Null handling:
+ -If task.getPriority() is null → base score defaults to 0.
+ -If task.getDueDate() is null → no due date factor applied.
+ -If task.getUpdatedAt() is null → ChronoUnit.DAYS.between() may throw an exception.
+
+Negative scores:
+ -Completed tasks can end up with negative scores (e.g., LOW priority + DONE).
+ -Sorting still works, but developers should decide if negatives are acceptable.
+
+Tag matching:
+ -Only exact matches for "blocker", "critical", "urgent".
+ -Case sensitivity may cause misses (e.g., "Critical" won’t match).
+
+4. Suggested Inline Comments
+Here’s how you could annotate the code for clarity:
+// Assign base weights to priorities (LOW=1, MEDIUM=2, HIGH=3, URGENT=4)
+// Base score = priority weight × 10
+// Add urgency based on due date proximity
+// Penalize completed or review tasks
+// Boost score if task has critical tags
+// Boost score if task was updated within the last 24 hours
+5. Potential Improvements
+ -Null safety: Add checks for task.getUpdatedAt() to avoid exceptions.
+ -Case-insensitive tags: Normalize tags to lowercase before matching.
+ -Configurable weights: Move hardcoded values (e.g., +30, −50) into a config file or constants for easier tuning.
+ -Unit tests: Verify scoring logic across scenarios (overdue, completed, urgent tags, etc.).
+ -Tie-breaking: If two tasks have equal scores, consider secondary sorting (e.g., by due date or creation time).
+*/
+//A final combined documentation version
+/*
+TaskPriorityManager Documentation
+Overview
+The TaskPriorityManager class provides algorithms to evaluate and rank tasks by importance. It calculates a priority score for each task based on urgency, due date, completion status, tags, and recent updates. This score is then used to sort tasks so that the most critical ones appear first, helping users focus on what matters most.
+
+Method: calculateTaskScore(Task task)
+Description
+Computes a priority score for a given task using weighted factors. The score reflects urgency, importance, and recency.
+
+Parameters
+task (Task) → The task object containing attributes such as priority, due date, status, tags, and last update timestamp.
+
+Return Value
+int → A numerical score representing the task’s importance. Higher values indicate greater urgency.
+
+Logic Breakdown
+Base priority weights
+ LOW=1, MEDIUM=2, HIGH=3, URGENT=4.
+ Base score = weight × 10.
+
+Due date factor
+ Overdue → +30
+ Due today → +20
+ Due in 2 days → +15
+ Due in a week → +10
+
+Status adjustment
+ DONE → −50
+ REVIEW → −15
+
+Tag boost
+ If tags include "blocker", "critical", or "urgent" → +8.
+
+Recent update boost
+ Updated within last 24 hours → +5.
+
+Inline Comments (suggested)
+java
+// Base score from priority weight
+int score = priorityWeights.getOrDefault(task.getPriority(), 0) * 10;
+
+// Add urgency based on due date proximity
+if (task.getDueDate() != null) {
+    long daysUntilDue = ChronoUnit.DAYS.between(LocalDateTime.now(), task.getDueDate());
+    if (daysUntilDue < 0) {      // Overdue
+        score += 30;
+    } else if (daysUntilDue == 0) { // Due today
+        score += 20;
+    } else if (daysUntilDue <= 2) { // Due soon
+        score += 15;
+    } else if (daysUntilDue <= 7) { // Due within a week
+        score += 10;
+    }
+}
+
+// Penalize completed or review tasks
+if (task.getStatus() == TaskStatus.DONE) {
+    score -= 50;
+} else if (task.getStatus() == TaskStatus.REVIEW) {
+    score -= 15;
+}
+
+// Boost score if task has critical tags
+if (task.getTags().stream().anyMatch(tag ->
+        List.of("blocker", "critical", "urgent").contains(tag))) {
+    score += 8;
+}
+
+// Boost score if task was updated within the last 24 hours
+long daysSinceUpdate = ChronoUnit.DAYS.between(task.getUpdatedAt(), LocalDateTime.now());
+if (daysSinceUpdate < 1) {
+    score += 5;
+}
+Assumptions & Edge Cases
+ -Null priority → defaults to 0.
+ -Null due date → no due date factor applied.
+ -Null updatedAt → may throw DateTimeException.
+ -Negative scores possible for completed tasks.
+ -Tag matching is case-sensitive.
+
+Potential Improvements
+ -Add null safety for updatedAt.
+ -Normalize tags to lowercase for matching.
+ -Externalize weights into config/constants.
+ -Add tie-breaking rules for equal scores.
+ -Unit tests for overdue, completed, urgent-tagged tasks.
+
+Method: sortTasksByImportance(List<Task> tasks)
+Description
+ -Sorts tasks by their calculated score in descending order.
+
+Parameters
+ -tasks (List<Task) → List of tasks to sort.
+
+Return Value
+ -List<Task> → Sorted list, highest priority first.
+
+Notes
+ -Stable sort: equal scores retain relative order.
+ -Relies on calculateTaskScore() for scoring.
+
+Method: getTopPriorityTasks(List<Task> tasks, int limit)
+Description
+ -Returns the top N tasks with the highest scores.
+
+Parameters
+ -tasks (List<Task) → List of tasks to evaluate.
+ -limit (int) → Number of tasks to return.
+
+Return Value
+ -List<Task> → Top N tasks by importance.
+
+Notes
+ -If limit > list size, returns all tasks.
+ -Useful for dashboards or daily focus views.
+
+Developer Notes
+ -Complexity: O(n log n) due to sorting.
+ -Extensibility: Add new scoring factors easily.
+ -Thread Safety: Stateless, safe for concurrent use.
+ -Testing: Validate across priority levels, due dates, and statuses.
+*/
