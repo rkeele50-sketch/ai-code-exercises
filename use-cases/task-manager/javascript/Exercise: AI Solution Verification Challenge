@@ -1,0 +1,133 @@
+//Sample Problems for Verification
+//Buggy sorting function
+/**
+// Buggy sorting function
+function mergeSort(arr) {
+  if (arr.length <= 1) return arr;
+
+  const mid = Math.floor(arr.length / 2);
+  const left = mergeSort(arr.slice(0, mid));
+  const right = mergeSort(arr.slice(mid));
+
+  return merge(left, right);
+}
+
+function merge(left, right) {
+  let result = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < left.length && j < right.length) {
+    if (left[i] < right[j]) {
+      result.push(left[i]);
+      i++;
+    } else {
+      result.push(right[j]);
+      j++;
+    }
+  }
+
+  // Bug: Only one of these loops will execute
+  while (i < left.length) {
+    result.push(left[i]);
+    j++; // Bug: incrementing j instead of i
+  }
+
+  while (j < right.length) {
+    result.push(right[j]);
+    j++;
+  }
+
+  return result;
+}
+*/
+
+//Documentaton of the verification process and what I have learned
+/** 
+Step 1: Identify bug symptoms  
+The original code produced incorrect results because the leftover elements from the left array weren’t added properly (wrong index increment).
+
+Step 2: Trace logic manually  
+I walked through a small input like [3, 1, 2] to see how indices i and j moved. This revealed the incorrect j++ inside the left loop.
+
+Step 3: Correct and re-test  
+Fixed the increment to i++ and tested with multiple arrays:
+
+[3, 1, 2] → [1, 2, 3]
+
+[5, 4, 3, 2, 1] → [1, 2, 3, 4, 5]
+
+[10] → [10]  
+All produced correct sorted outputs.
+
+Step 4: Confirm algorithm correctness  
+Verified that the merge sort now consistently divides, merges, and handles leftover elements correctly.
+
+What I learned:
+Small index mistakes can break the entire algorithm.
+Manual dry runs with small arrays are powerful for catching logic errors.
+Verification requires both code inspection and test execution.
+*/
+
+//Implementation of the final-verified solution
+/** 
+function mergeSort(arr) {
+  if (arr.length <= 1) return arr;
+
+  const mid = Math.floor(arr.length / 2);
+  const left = mergeSort(arr.slice(0, mid));
+  const right = mergeSort(arr.slice(mid));
+
+  return merge(left, right);
+}
+
+function merge(left, right) {
+  let result = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < left.length && j < right.length) {
+    if (left[i] < right[j]) {
+      result.push(left[i]);
+      i++;
+    } else {
+      result.push(right[j]);
+      j++;
+    }
+  }
+
+  // Corrected loops
+  while (i < left.length) {
+    result.push(left[i]);
+    i++; // increment i correctly
+  }
+
+  while (j < right.length) {
+    result.push(right[j]);
+    j++;
+  }
+
+  return result;
+}
+
+*/
+
+//How did your confidence in the solution change after verification?
+/** 
+Initially: moderate confidence (the structure looked right but I suspected subtle bugs).
+After dry runs and test cases: high confidence that the algorithm is correct and stable.
+*/
+
+//What aspects of the AI solution required the most scrutiny?
+/**
+The merge function loops — especially the handling of leftover elements.
+Ensuring indices (i, j) were incremented correctly.
+Confirming that recursion terminates properly with the base case.
+*/
+
+//Which verification technique was most valuable for your specific problem?
+/**
+Manual dry runs with small arrays were the most effective.
+They exposed the index bug quickly and gave confidence that the fix worked.
+Automated tests confirmed correctness across broader cases, but the manual step was key to spotting the subtle error.
+*/
