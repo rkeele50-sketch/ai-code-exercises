@@ -1,3 +1,4 @@
+
 //The project information you chose to document
 /**
  EventHub
@@ -326,11 +327,11 @@ Troubleshooting deserves its own section: Users often jump straight to this when
 */
 //How you would incorporate this approach into your development workflow
 /**
-Documentation as part of development: Treat README and guides as living documents updated alongside code changes, not afterthoughts.
+-Treat README and guides as living documents updated alongside code changes, not afterthoughts.
 
-Prompt‑driven drafting: Use structured prompts (like the ones we refined together) to quickly generate first drafts, then polish manually.
+-Prompt‑driven drafting: Use structured prompts (like the ones we refined together) to quickly generate first drafts, then polish manually.
 
-Consistency templates: Maintain a template for README, guides, and FAQs so every new feature or integration follows the same structure.
+-Consistency templates: Maintain a template for README, guides, and FAQs so every new feature or integration follows the same structure.
 
-Feedback loop: Encourage team members to add common issues they encounter directly into the FAQ or troubleshooting sections, keeping docs relevant and evolving.
+-Feedback loop: Encourage team members to add common issues they encounter directly into the FAQ or troubleshooting sections, keeping docs relevant and evolving.
 */

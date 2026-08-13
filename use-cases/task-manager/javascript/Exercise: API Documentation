@@ -1,3 +1,5 @@
+
+
 //The original API endpoint code you chose to document
 /**
 const productRouter = express.Router();
@@ -735,27 +737,17 @@ Pagination and sorting: Documenting page, limit, sort, and order in a way that�
 Error handling: The API returns different error codes (400, 404, 500) with specific messages. Capturing these consistently and showing developers how to interpret them was important but required extra attention.
 
 How I adjusted my prompts to get better results
-Specified structure: I asked for “structured Markdown” or “OpenAPI format” to ensure the output was machine-readable and developer-friendly.
-
-Added context: By clarifying the audience (developers with ~2 years’ experience), I tuned the tone to be approachable but not overly simplistic.
-
-Focused requests: Instead of asking for “documentation,” I broke it down into endpoint definitions, parameters, responses, and examples. This produced more complete and usable docs.
+-I asked for “structured Markdown” or “OpenAPI format” to ensure the output was machine-readable and developer-friendly.
+-I added context, by clarifying the audience (developers with ~2 years’ experience), I tuned the tone to be approachable but not overly simplistic.
+-Instead of asking for “documentation,” I broke it down into endpoint definitions, parameters, responses, and examples. This produced more complete and usable docs.
 
 Which documentation format was most effective
-OpenAPI (Swagger): Best for integration with tools like Swagger UI and Postman. It makes the API interactive and testable.
-
-Markdown developer guide: Most effective for onboarding developers quickly. It’s lightweight, readable in any editor, and easy to share in repos.
-
-Hybrid approach: Combining Markdown guides (for human readability) with OpenAPI specs (for tooling) gave the best balance.
+-OpenAPI (Swagger): Best for integration with tools like Swagger UI and Postman. It makes the API interactive and testable.
 
 How to incorporate this approach into a development workflow
-Start with OpenAPI spec: Define endpoints, parameters, and schemas early. This acts as a contract between backend and frontend teams.
-
-Generate Markdown guides: Convert the spec into a friendly developer guide with examples, tips, and error handling notes.
-
-Automate updates: Use tools like swagger-jsdoc or redoc to keep documentation in sync with code changes.
-
-Include examples in code repos: Add request/response snippets in README files or /docs folders so developers can quickly test endpoints.
-
-Iterate with feedback: Encourage developers to report unclear sections. Adjust documentation prompts to improve clarity and completeness.
+-Start with OpenAPI spec: Define endpoints, parameters, and schemas early. This acts as a contract between backend and frontend teams.
+-Generate Markdown guides: Convert the spec into a friendly developer guide with examples, tips, and error handling notes.
+-Automate updates: Use tools like swagger-jsdoc or redoc to keep documentation in sync with code changes.
+-Include examples in code repos: Add request/response snippets in README files or /docs folders so developers can quickly test endpoints.
+-Iterate with feedback: Encourage developers to report unclear sections. Adjust documentation prompts to improve clarity and completeness.
  */
