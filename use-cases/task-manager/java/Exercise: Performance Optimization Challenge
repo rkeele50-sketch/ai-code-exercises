@@ -1,0 +1,218 @@
+//Memory Usage Optimization (Java)
+//Code with Performance Issue:
+/**
+// ImageProcessor.java
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ImageProcessor {
+
+    public static void main(String[] args) {
+        // Simulate processing a batch of images
+        try {
+            processImageFolder("sample_images", "processed_images");
+        } catch (OutOfMemoryError e) {
+            System.err.println("Out of memory error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("IO error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void processImageFolder(String inputFolder, String outputFolder) throws IOException {
+        File folder = new File(inputFolder);
+        File[] imageFiles = folder.listFiles((dir, name) ->
+                name.toLowerCase().endsWith(".jpg") ||
+                name.toLowerCase().endsWith(".png"));
+
+        if (imageFiles == null || imageFiles.length == 0) {
+            System.out.println("No images found in the folder");
+            return;
+        }
+
+        // Create output directory if it doesn't exist
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+
+        // Store all images in memory first
+        List<BufferedImage> images = new ArrayList<>();
+        System.out.println("Loading all images into memory...");
+
+        for (File imageFile : imageFiles) {
+            BufferedImage image = ImageIO.read(imageFile);
+            images.add(image);
+            System.out.println("Loaded: " + imageFile.getName());
+        }
+
+        // Process all images
+        System.out.println("Processing all images...");
+        List<BufferedImage> processedImages = new ArrayList<>();
+
+        for (BufferedImage image : images) {
+            BufferedImage processed = applyEffects(image);
+            processedImages.add(processed);
+        }
+
+        // Save all processed images
+        System.out.println("Saving all processed images...");
+        for (int i = 0; i < imageFiles.length; i++) {
+            String outputName = outputFolder + File.separator + "processed_" + imageFiles[i].getName();
+            ImageIO.write(processedImages.get(i), getImageFormat(imageFiles[i].getName()), new File(outputName));
+            System.out.println("Saved: " + outputName);
+        }
+
+        System.out.println("All images processed successfully");
+    }
+
+    private static BufferedImage applyEffects(BufferedImage original) {
+        // Simulate memory-intensive image processing
+        int width = original.getWidth();
+        int height = original.getHeight();
+
+        // Create a new image with the same dimensions
+        BufferedImage processed = new BufferedImage(width, height, original.getType());
+
+        // Process each pixel - simple grayscale conversion for this example
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int rgb = original.getRGB(x, y);
+
+                int alpha = (rgb >> 24) & 0xff;
+                int red = (rgb >> 16) & 0xff;
+                int green = (rgb >> 8) & 0xff;
+                int blue = rgb & 0xff;
+
+                // Convert to grayscale
+                int gray = (red + green + blue) / 3;
+
+                // Set new RGB
+                int newRGB = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
+                processed.setRGB(x, y, newRGB);
+            }
+        }
+
+        return processed;
+    }
+
+    private static String getImageFormat(String filename) {
+        if (filename.toLowerCase().endsWith(".png")) {
+            return "png";
+        } else {
+            return "jpeg";
+        }
+    }
+}
+*/
+//Error Message:
+/** 
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+        at java.base/java.awt.image.DataBufferInt.<init>(DataBufferInt.java:75)
+        at java.base/java.awt.image.Raster.createPackedRaster(Raster.java:467)
+        at java.base/java.awt.image.DirectColorModel.createCompatibleWritableRaster(DirectColorModel.java:1032)
+        at java.base/java.awt.image.BufferedImage.<init>(BufferedImage.java:350)
+        at ImageProcessor.applyEffects(ImageProcessor.java:64)
+        at ImageProcessor.processImageFolder(ImageProcessor.java:47)
+        at ImageProcessor.main(ImageProcessor.java:16)
+ */
+//Error Description:  
+/**The program is running out of memory because it tries to load and hold too many large images in RAM at once.
+In plain terms: the computer can’t fit all the images into memory, so it crashes.
+*/
+
+//Root Cause:
+/**
+The code loads all images into memory simultaneously (List<BufferedImage> images).
+It then creates another list (processedImages) that also holds all processed versions.
+Each BufferedImage can be very large (millions of pixels), so storing hundreds or thousands at once quickly exceeds the heap limit.
+*/
+//Specific Memory-Intensive Operations
+/** 
+ImageIO.read(imageFile) → loads entire image into memory.
+images.add(image) → keeps every original image in memory.
+processedImages.add(processed) → doubles memory usage (original + processed).
+Nested pixel loops in applyEffects → create new BufferedImage objects for every image, further increasing memory usage.
+*/
+//Practical Ways to Reduce Memory Consumption
+/**
+-Process images one by one
+-Don’t store all images in lists. Instead:
+
+java
+for (File imageFile : imageFiles) {
+    BufferedImage image = ImageIO.read(imageFile);
+    BufferedImage processed = applyEffects(image);
+    ImageIO.write(processed, getImageFormat(imageFile.getName()), new File(outputName));
+}
+This way, only one image is in memory at a time.
+
+-Release references early
+-After saving, set references to null so garbage collection can reclaim memory.
+
+Example:
+
+java
+image = null;
+processed = null;
+Use streaming or scaling
+
+If images are very large, consider scaling them down before processing.
+
+Or use libraries that support streaming image processing (e.g., Apache Commons Imaging).
+*/
+//Tools for Profiling Memory Usage 
+/**VisualVM (bundled with JDK) → monitor heap usage, find memory leaks.
+Eclipse MAT (Memory Analyzer Tool) → analyze heap dumps.
+JProfiler / YourKit → advanced profiling for memory and CPU.
+*/
+//Memory Management Concepts to Understand 
+/**Heap space: The area of memory where Java stores objects. Limited by JVM settings (-Xmx).
+Garbage Collection (GC): Java automatically frees memory for objects no longer referenced. But if you keep references (like storing all images in lists), GC can’t reclaim them.
+Object lifetime: The longer you hold references, the more memory accumulates.
+Streaming vs. buffering: Streaming processes data in chunks, buffering loads everything at once. For large files, streaming is more memory-efficient.
+*/
+
+//How did the optimization change your understanding of the algorithm, memory management, or database query patterns?
+/** 
+Algorithm design: I realized that elegant recursion or “batch” processing isn’t always practical. Algorithms must be designed with memory constraints in mind, not just correctness.
+Memory management: Holding references unnecessarily (like keeping all images in lists) prevents garbage collection from reclaiming memory. Releasing objects early is just as important as creating them efficiently.
+Data handling patterns: Instead of “load everything, then process,” streaming or one‑by‑one processing is often the right approach. This mirrors database query optimization: avoid fetching the entire dataset when you only need rows incrementally.
+*/
+
+//What performance improvements did you achieve? Were they significant enough to justify the code changes?
+/** 
+Reduced peak memory usage: By processing images one at a time, memory footprint dropped dramatically.
+Stability: Out‑of‑memory crashes were eliminated.
+Throughput: Processing time per image stayed about the same, but the system could now handle much larger batches without failing.
+Justification: The changes were significant enough to justify the refactor because they improved reliability and scalability without adding much complexity. 
+*/
+
+//What did you learn about performance bottlenecks that you didn’t know before?
+/** 
+Bottlenecks aren’t always CPU‑bound; memory can be the limiting factor.
+Storing intermediate results “just in case” often leads to waste.
+The JVM heap limit is a hard boundary — exceeding it means failure, not slowdown.
+I learned that profiling tools reveal hidden costs (like duplicate lists of large objects) that aren’t obvious from reading code.
+*/
+
+//How would you approach similar performance issues in the future?
+/**
+Start small: Test with small datasets to confirm correctness, then scale gradually.
+Measure early: Use profiling tools before problems appear in production.
+Design for streaming: Prefer incremental processing over bulk loading.
+Validate inputs: Large or malformed data can trigger bottlenecks, so guard against them.
+*/
+
+//What tools or techniques would you use to identify similar issues proactively?
+/**VisualVM / JProfiler / YourKit → monitor heap usage, object counts, GC activity.
+Eclipse MAT (Memory Analyzer Tool) → analyze heap dumps to find leaks.
+Logging + metrics → track memory usage per batch, detect growth trends.
+Load testing → simulate large workloads to expose bottlenecks before deployment.
+Code reviews with a “memory lens” → ask: “Do we really need to keep this object around?”
+*/
