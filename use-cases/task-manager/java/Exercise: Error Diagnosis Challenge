@@ -1,0 +1,151 @@
+//Exercise: Error Diagnosis Challenge
+
+//2. Stack Overflow (Java)
+//Error Message
+/**Exception in thread "main" java.lang.StackOverflowError
+	at com.example.recursion.FactorialCalculator.calculateFactorial(FactorialCalculator.java:15)
+	at com.example.recursion.FactorialCalculator.calculateFactorial(FactorialCalculator.java:15)
+	at com.example.recursion.FactorialCalculator.calculateFactorial(FactorialCalculator.java:15)
+	at com.example.recursion.FactorialCalculator.calculateFactorial(FactorialCalculator.java:15)
+	at com.example.recursion.FactorialCalculator.calculateFactorial(FactorialCalculator.java:15)
+	... [1000+ more lines of the same call]
+*/
+// FactorialCalculator.java
+/** 
+package com.example.recursion;
+
+public class FactorialCalculator {
+    public static void main(String[] args) {
+        int result = calculateFactorial(5);
+        System.out.println("Factorial of 5 is: " + result);
+    }
+
+    public static int calculateFactorial(int num) {
+        // Missing base case or incorrect recursive call
+        // This will cause infinite recursion
+        return num * calculateFactorial(num - 1);
+    }
+}
+*/
+//1.Error description and what it means  
+/** 
+1. What the error means (simple terms)
+  -A StackOverflowError happens when your program keeps calling the same method over and over without stopping. Think of it like someone falling into an endless loop of stairs — eventually, they run out of space. In your case, the factorial function never reached a stopping point, so Java’s memory stack filled up.
+ */
+//2.Root cause identification
+/** 
+2. Most relevant lines in the stack trace 
+  -The important part is:
+  -Code
+  -at com.example.recursion.FactorialCalculator.calculateFactorial(FactorialCalculator.java:15)
+  -This line points directly to your code (line 15 in FactorialCalculator.java). The repeated lines show the same method being called again and again — that’s the recursion loop.
+3. Likely causes of this error 
+   -Missing base case: Your factorial function probably doesn’t stop when n == 0 or n == 1.
+   -Incorrect recursive step: Maybe you’re calling calculateFactorial(n) instead of calculateFactorial(n - 1).
+   -Invalid input: Passing a negative number or very large number could cause infinite recursion or exceed stack limits.
+ */
+//3.Suggested solution
+/** 
+4. What to look for in your code 
+   -Check:
+   -Does your method have a base case (like if (n == 0) return 1;)?
+   -Are you decreasing the input each time (n - 1)?
+   -Are you validating inputs (e.g., rejecting negatives)?
+
+5. Step-by-step debugging approach 
+   -Open FactorialCalculator.java at line 15 — that’s where the recursion happens.
+   -Verify the base case:
+   -java
+   -if (n == 0 || n == 1) return 1;
+   Check recursive call:
+   java
+   return n * calculateFactorial(n - 1);
+   -Make sure it reduces n.
+   -Add input validation:
+   java
+   if (n < 0) throw new IllegalArgumentException("Negative numbers not allowed");
+  -Test with small inputs (like 5!) before trying large ones.
+  -Print debug statements:
+   java
+   System.out.println("Calculating factorial of " + n);
+  -This shows how the recursion flows.
+  -If large inputs are needed, consider an iterative approach (loop instead of recursion) to avoid stack overflow.
+ */
+//Learning points that could help prevent similar errors
+/** 
+Always define a base case in recursion
+
+Every recursive method needs a clear stopping condition.
+
+Example:
+
+java
+if (n == 0 || n == 1) return 1;
+Without this, the method keeps calling itself forever.
+
+Ensure progress toward the base case
+
+Each recursive call should move closer to the stopping condition.
+
+For factorial, that means reducing n each time (n - 1).
+
+If you accidentally call with the same value (calculateFactorial(n)), you’ll loop infinitely.
+
+Validate inputs before recursion
+
+Negative numbers or very large inputs can cause runaway recursion.
+
+Add checks like:
+
+java
+if (n < 0) throw new IllegalArgumentException("Negative input not allowed");
+Broader Best Practices
+Prefer iteration for large computations  
+Recursion is elegant but can overflow the stack with big inputs. Iterative loops are safer for factorials and similar problems.
+
+Use logging or print statements for debugging  
+Printing the input at each recursive step helps you see where the recursion goes wrong.
+
+Think about algorithm efficiency  
+Factorial grows fast, so even correct recursion can hit limits. Consider iterative or memoized approaches if performance matters.
+Debugging Mindset
+When you see repeated lines in a stack trace, it’s a strong signal of infinite recursion.
+
+Focus on the first line pointing to your code — that’s where the recursion starts.
+
+Ask yourself: “Does this method have a way to stop?” and “Am I moving toward that stop?”
+ */
+//Exercise Solution Format
+/** 
+Error Analysis: StackOverflowError
+Error Description:  
+Your program kept calling the same method (calculateFactorial) over and over without stopping. In plain language: the computer ran out of memory space because the factorial function never reached a point where it could stop.
+
+Root Cause:  
+The recursion in FactorialCalculator.calculateFactorial (line 15) does not have a proper base case or is not reducing the input correctly. As a result, the method keeps calling itself infinitely.
+
+Solution:  
+Update your factorial method to include a clear base case and ensure the recursive call reduces the input:
+
+java
+public int calculateFactorial(int n) {
+    if (n < 0) {
+        throw new IllegalArgumentException("Negative numbers not allowed");
+    }
+    if (n == 0 || n == 1) {
+        return 1; // Base case
+    }
+    return n * calculateFactorial(n - 1); // Recursive step
+}
+Learning Points:
+
+Always define a base case in recursive functions to stop the recursion.
+
+Ensure each recursive call moves closer to the base case (e.g., n - 1).
+
+Validate inputs before recursion to avoid invalid or runaway cases.
+
+For large inputs, consider an iterative approach instead of recursion to prevent stack overflow.
+
+Use debug prints or logging to trace recursion flow when diagnosing errors.
+ */
